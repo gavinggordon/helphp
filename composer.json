@@ -1,0 +1,52 @@
+{
+
+	"name": "gavinggordon/helphp",
+	"description": "A PHP CLI package that provides the developer with the means to generate PHP related files, like classes and .ini's, in a variety of different levels of both simplicity and complexity.",
+	"license": "MIT",
+	"keywords": [
+	  	"v0.0.2",
+		"php",
+		"code-generation",
+		"templating",
+		"generation",
+		"templates",
+		"command",
+		"CLI",
+		"helper functions",
+		"helpers",
+		"simplification",
+		"class creation",
+		"file creation",
+		"psr-4 compliant"
+	],
+	"authors": [
+		{
+			"name": "Gavin G Gordon",
+			"email": "support@gavingordon.com",
+			"homepage": "https://gavingordon.com",
+			"role": "Developer"
+		}
+	],
+	"version": "0.0.2",
+	"minimum-stability": "dev",
+	"homepage": "http://helphp.gavingordon.com",
+	"support": {
+		"issues": "https://github.com/gavinggordon/helphp/issues",
+		"source": "https://github.com/gavinggordon/helphp"
+	},
+	"repositories": [
+		{
+			"type": "git",
+			"url": "https://github.com/gavinggordon/helphp.git"
+		}
+	],
+	"require": {
+		"symfony/console": "^3.2",
+		"symfony/filesystem": "^3.2"
+	},
+	"autoload": {
+		"psr-4": {
+			"Helphp\\": "src/"
+		}
+	}
+}
