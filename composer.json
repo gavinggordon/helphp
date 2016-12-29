@@ -4,7 +4,7 @@
 	"description": "A PHP CLI package that provides the developer with the means to generate PHP related files, like classes and .ini's, in a variety of different levels of both simplicity and complexity.",
 	"license": "MIT",
 	"keywords": [
-	  	"v0.0.2",
+	  	"v1.0.0-alpha",
 		"php",
 		"code-generation",
 		"templating",
@@ -27,7 +27,7 @@
 			"role": "Developer"
 		}
 	],
-	"version": "0.0.2",
+	"version": "1.0.0-alpha",
 	"minimum-stability": "dev",
 	"homepage": "http://helphp.gavingordon.com",
 	"support": {
