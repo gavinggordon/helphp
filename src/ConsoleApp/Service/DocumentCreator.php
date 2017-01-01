@@ -124,7 +124,7 @@ EOT;
 	/*
 	 * Create
 	 * 
-	 * @param string $type 'type of PHP file to create' ex. Class | Abstract | Trait | Interface
+	 * @param string $type 'type of PHP file to create' ex. Class | Abstract Class | Trait | Interface
 	 * @param string $classname 'name of the class to create' ex. TestClass | Test\TestClass
 	 * @param assoc-array $options 'array of input options' ex. ['namespace' => 'TestNamespace']
 	 * 
@@ -139,13 +139,13 @@ EOT;
 		}
 	 	if( (! isset( $this->files[ $this->tmpSaveDir . $classname . '.php' ] ) ) && (! file_exists( $this->tmpSaveDir . $classname . '.php' ) ) )
 		{
-			
-			$fileContent .=<<<EOT
+			$fileContent =<<<EOT
+&lt;?php
 
 {$options['namespace']}
 {$options['uses']}
 {$options['traits']['external']}
-class {$options['classname']} {$options['extends']} {$options['implements']}
+{$type} {$options['classname']} {$options['extends']} {$options['implements']}
 {
 	{$options['traits']['internal']}
 	{$options['constants']}
@@ -157,9 +157,9 @@ class {$options['classname']} {$options['extends']} {$options['implements']}
 	{$options['private_static_properties']}
 EOT;
 			
-		if( $singleton === NULL )
-		{
-			$this->fileContent .=<<<'EOT'
+			if( $options['singleton'] === NULL )
+			{
+				$fileContent .=<<<'EOT'
 	
 	public function __construct()
 	{
@@ -168,10 +168,10 @@ EOT;
 
 EOT;
 
-		}
-		else
-		{
-			$this->fileContent .=<<<'EOT'
+			}
+			else
+			{
+				$fileContent .=<<<'EOT'
 	
 	protected static $instance = NULL;
 	
@@ -211,11 +211,10 @@ EOT;
 
 EOT;
 
-		}
-		
-		if( $magic_get_set !== NULL )
-		{
-			$this->fileContent .=<<<'EOT'
+			}
+			if( $options['magic_get_set'] !== NULL )
+			{
+				$fileContent .=<<<'EOT'
 
 	public function __set( $property, $value )
 	{
@@ -230,35 +229,33 @@ EOT;
 
 EOT;
 
-		}
-			
-		$this->fileContent .=<<<EOT
+			}
+			$fileContent .=<<<EOT
 			
 }
 
 EOT;
 		
-		// original regex: "/(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+/", "\n"
-		$this->fileContent = preg_replace( "/(^[\r\n]{2,})[\s\t]*[\r\n]+/", static::NLNL, $this->fileContent );
-		if(! file_exists( $savedir . $classname . '.php' ) )
-		{
-			$file = fopen( $savedir . $classname . '.php', 'w' );
-			if( $file )
+			// original regex: "/(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+/", "\n"
+			$fileContent = preg_replace( "/(^[\r\n]{2,})[\s\t]*[\r\n]+/", static::NLNL, $fileContent );
+			if(! file_exists( $options['savedir'] . $classname . '.php' ) )
 			{
-				fwrite( $file, html_entity_decode( $this->fileContent, ENT_HTML5 ) );
-				$output->writeln( 'Your class ' . $classname . ' got initialized, was populated with your specified data, and has been saved in ' . $savedir . ' successfully.' );
+				$file = fopen( $options['savedir'] . $classname . '.php', 'w' );
+				if( $file )
+				{
+					fwrite( $file, html_entity_decode( $fileContent, ENT_HTML5 ) );
+					$output->writeln( 'Your class ' . $classname . ' got initialized, was populated with your specified data, and has been saved in ' . $options['savedir'] . ' successfully.' );
+				}
+				else
+				{
+					$output->writeln( 'Your class ' . $classname . ' could not be saved in ' . $options['savedir'] . ', due to this error: ' . error_get_last() . '.' );
+				}
+				fclose( $file );
 			}
 			else
 			{
-				$output->writeln( 'Your class ' . $classname . ' could not be saved in ' . $savedir . ', due to this error: ' . error_get_last() . '.' );
+				$output->writeln( 'A file with the same name as ' . $classname . ' already exists in ' . $options['savedir'] . '.' );
 			}
-			fclose( $file );
-		}
-		else
-		{
-			$output->writeln( 'A file with the same name as ' . $classname . ' already exists in ' . $savedir . '.' );
 		}
 	}
-		}
-	 }
 }

@@ -15,7 +15,7 @@ class ClassCommand extends Command
 	const NL = "\n";
 	const NLNL = "\n\n";
 	const DIR_SEP = DIRECTORY_SEPARATOR;
-	const BASE_DIR = dirname( dirname( dirname( dirname( __DIR__ ) ) ) ) . DIRECTORY_SEPARATOR;
+	const BASE_DIR = dirname( dirname( dirname( dirname( __DIR__ ) ) ) );
 	const COMMAND_INFO = [
 		'create:class' => 'Creates a new class file, prepared just the way you like.'
 	];
@@ -80,10 +80,10 @@ class ClassCommand extends Command
 	
 	private function setAppropriateSaveDir()
 	{
-		$baseDir = ( is_dir( static::BASE_DIR . 'vendor' ) && file_exists( static::BASE_DIR . 'vendor' . static::DIR_SEP . 'autoload.php' ) ) 
-						 ? static::BASE_DIR : 
-						 ( is_dir( static::BASE_DIR . '..' . static::DIR_SEP . 'vendor' ) && file_exists( static::BASE_DIR . '..' . static::DIR_SEP . 'vendor' . static::DIR_SEP . 'autoload.php' ) ) 
-						 ? static::BASE_DIR . '..' . static::DIR_SEP : 
+		$baseDir = ( is_dir( static::BASE_DIR . static::DIR_SEP . 'vendor' ) && file_exists( static::BASE_DIR . static::DIR_SEP . 'vendor' . static::DIR_SEP . 'autoload.php' ) ) 
+						 ? static::BASE_DIR . static::DIR_SEP : 
+						 ( is_dir( static::BASE_DIR . static::DIR_SEP . '..' . static::DIR_SEP . 'vendor' ) && file_exists( static::BASE_DIR . static::DIR_SEP . '..' . static::DIR_SEP . 'vendor' . static::DIR_SEP . 'autoload.php' ) ) 
+						 ? static::BASE_DIR . static::DIR_SEP . '..' . static::DIR_SEP : 
 						 dirname( dirname( __DIR__ ) ) . static::DIR_SEP;
 		if(! is_dir( $baseDir . 'tmp' ) )
 		{
@@ -241,9 +241,26 @@ class ClassCommand extends Command
 	protected function execute( InputInterface $input, OutputInterface $output )
 	{
 		$classname = $input->getArgument( $this->commandArgumentName[0] );
-		$savedir = $input->getArgument( $this->commandArgumentName[1] );
+		$savedir = $input->getArgument( $this->commandArgumentName[1] ) || NULL;
 		
-		$namespace = $uses = $extends = $implements = $traits = $singleton = $magic_get_set = $constants = $public_properties = $protected_properties = $private_properties = $public_static_properties = $protected_static_properties = $private_static_properties = NULL;
+		// $namespace = $uses = $extends = $implements = $traits = $singleton = $magic_get_set = $constants = $public_properties = $protected_properties = $private_properties = $public_static_properties = $protected_static_properties = $private_static_properties = NULL;
+		$options = [
+			'savedir' => $savedir,
+			'namespace' => NULL,
+			'uses' => NULL,
+			'extends' => NULL,
+			'implements' => NULL,
+			'traits' => NULL,
+			'singleton' => NULL,
+			'magic_get_set' => NULL,
+			'constants' => NULL,
+			'public_properties' => NULL,
+			'protected_properties' => NULL,
+			'private_properties' => NULL,
+			'public_static_properties' => NULL,
+			'protected_static_properties' => NULL,
+			'private_static_properties' => NULL
+		];
 		
 		foreach( $this->commandOptionName as $index => $optionName )
 		{
@@ -252,7 +269,7 @@ class ClassCommand extends Command
 			{
 				if( is_string( $input->getOption( $optionName ) ) && strlen( $input->getOption( $optionName ) ) > 1 )
 				{
-					$namespace = 'namespace ' . $input->getOption( $optionName ) . ';' . static::NLNL;
+					$options[ $optionName ] = 'namespace ' . $input->getOption( $optionName ) . ';' . static::NLNL;
 				}
 			}
 			if( $optionName === 'uses' )
@@ -264,6 +281,7 @@ class ClassCommand extends Command
 					{
 						$uses .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? 'use ' . $use . ';' . static::NLNL : 'use ' . $use . ';' . static::NL;
 					}
+					$options[ $optionName ] = $uses;
 				}
 			}
 			if( $optionName === 'extends' )
@@ -275,13 +293,14 @@ class ClassCommand extends Command
 					{
 						$extends .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? $extend : $extend . ', ';
 					}
+					$options[ $optionName ] = $extends;
 				}
 			}
 			if( $optionName === 'implements' )
 			{
 				if( is_string( $input->getOption( $optionName ) ) && strlen( $input->getOption( $optionName ) ) > 1 )
 				{
-					$implements = ' implements ' . $input->getOption( $optionName );
+					$options[ $optionName ] = ' implements ' . $input->getOption( $optionName );
 				}
 			}
 			if( $optionName === 'traits' )
@@ -309,20 +328,21 @@ class ClassCommand extends Command
 						 */
 						$traits['internal'] .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? ( ( preg_match( '/[\s]+?as[\s]+?[A-Za-z0-9]+?[\;]?$/', $trait ) ) ? str_replace( ';', '', substr( $trait, strripos( $trait, 'as ' ) + 3 ) ) . ';' . static::NLNL : str_replace( ';', '', substr( $trait, strripos( $trait, trim('\\ ') ) + 1 ) ) . ';' . static::NLNL ) : ( ( preg_match( '/[\s]+?as[\s]+?[A-Za-z0-9]+?[\;]?$/', $trait ) ) ? str_replace( ';', '', substr( $trait, strripos( $trait, 'as ' ) + 3 ) ) . ', ' : str_replace( ';', '', substr( $trait, strripos( $trait, trim('\\ ') ) + 1 ) ) . ', ' );
 					}
+					$options[ $optionName ] = $traits;
 				}
 			}
 			if( $optionName === 'singleton' )
 			{
 				if( $input->getOption( $optionName ) !== NULL )
 				{
-					$singleton = true;
+					$options[ $optionName ] = true;
 				}
 			}
 			if( $optionName === 'magic-get-set' )
 			{
 				if( $input->getOption( $optionName ) !== NULL )
 				{
-					$magic_get_set = true;
+					$options[ str_replace( '-', '_', $optionName ) ] = true;
 				}
 			}
 			if( $optionName === 'constants' )
@@ -351,6 +371,7 @@ class ClassCommand extends Command
 								break;
 						}
 					}
+					$options[ $optionName ] = $constants;
 				}
 			}
 			if( $optionName === 'public-properties' )
@@ -379,6 +400,7 @@ class ClassCommand extends Command
 								break;
 						}
 					}
+					$options[ str_replace( '-', '_', $optionName ) ] = $public_properties;
 				}
 			}
 			if( $optionName === 'protected-properties' )
@@ -407,6 +429,7 @@ class ClassCommand extends Command
 								break;
 						}
 					}
+					$options[ str_replace( '-', '_', $optionName ) ] = $protected_properties;
 				}
 			}
 			if( $optionName === 'private-properties' )
@@ -435,6 +458,7 @@ class ClassCommand extends Command
 								break;
 						}
 					}
+					$options[ str_replace( '-', '_', $optionName ) ] = $private_properties;
 				}
 			}
 			if( $optionName === 'public-static-properties' )
@@ -463,6 +487,7 @@ class ClassCommand extends Command
 								break;
 						}
 					}
+					$options[ str_replace( '-', '_', $optionName ) ] = $public_static_properties;
 				}
 			}
 			if( $optionName === 'protected-static-properties' )
@@ -491,6 +516,7 @@ class ClassCommand extends Command
 								break;
 						}
 					}
+					$options[ str_replace( '-', '_', $optionName ) ] = $protected_static_properties;
 				}
 			}
 			if( $optionName === 'private-static-properties' )
@@ -519,9 +545,11 @@ class ClassCommand extends Command
 								break;
 						}
 					}
+					$options[ str_replace( '-', '_', $optionName ) ] = $private_static_properties;
 				}
 			}
 		}
+		$this->documentCreator->create( 'class', $classname, $options );
 	/**
 		$classname = ucwords( $classname );
 		$savedir = preg_replace( '/[\/\\\\]/', DIRECTORY_SEPARATOR, $savedir );
