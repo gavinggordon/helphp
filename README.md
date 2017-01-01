@@ -53,5 +53,8 @@ This is a PHP CLI package which provides some helpful functions that make creati
 	* Update (*Still In Production*)	
 	* Delete (*Still In Production*)
 
+## Issues
+If you have any issues at all, please post your findings in the issues page at [https://github.com/gavinggordon/helphp/issues](https://github.com/gavinggordon/helphp/issues).
+
 ## License
 This package utilizes the MIT License.
