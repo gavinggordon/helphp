@@ -1,2 +1,14 @@
 #!/usr/bin/env php
-<?php/*|-----------------------------------------------------------------|*/require('./vendor/autoload.php');/*|-----------------------------------------------------------------|*/use Symfony\Component\Console\Application;/*|-----------------------------------------------------------------|*/$application=new Application();/*|-----------------------------------------------------------------|*/$application->add(new Helphp\Create\ClassCommand());/*|-----------------------------------------------------------------|*/$application->run();
+C:\xampp\php php
+<?php
+/*|-----------------------------------------------------------------|*/
+/* require(__DIR__.'/vendor/autoload.php'); */
+require( __DIR__ . DIRECTORY_SEPARATOR . 'app' . DIRECTORY_SEPARATOR . 'bootstrap.php' );
+/*|-----------------------------------------------------------------|*/
+/* $application = new \Symfony\Component\Console\Application(); */
+/*|-----------------------------------------------------------------|*/
+/* $application->addCommands(new Helphp\Create\ClassCommand()); */
+$application = $container['application'];
+/*|-----------------------------------------------------------------|*/
+$application->run();
+?>

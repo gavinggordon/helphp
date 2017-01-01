@@ -4,7 +4,7 @@
 	"description": "A PHP CLI package that provides the developer with the means to generate PHP related files, like classes and .ini's, in a variety of different levels of both simplicity and complexity.",
 	"license": "MIT",
 	"keywords": [
-	  	"v1.0.0-alpha",
+	  	"v1.0.0-alpha1",
 		"php",
 		"code-generation",
 		"templating",
@@ -12,6 +12,7 @@
 		"templates",
 		"command",
 		"CLI",
+		"console",
 		"helper functions",
 		"helpers",
 		"simplification",
@@ -27,7 +28,7 @@
 			"role": "Developer"
 		}
 	],
-	"version": "1.0.0-alpha",
+	"version": "1.0.0-alpha1",
 	"minimum-stability": "dev",
 	"homepage": "http://helphp.gavingordon.com",
 	"support": {
@@ -42,11 +43,16 @@
 	],
 	"require": {
 		"symfony/console": "^3.2",
-		"symfony/filesystem": "^3.2"
+		"symfony/filesystem": "^3.2",
+		"symfony/dependency-injection": "^3.2",
+		"symfony/config": "^3.2",
+		"symfony/yaml": "^3.2",
+		"pimple/pimple": "~3.0",
+		"spatie/array-to-xml": "^2.2"
 	},
 	"autoload": {
 		"psr-4": {
-			"Helphp\\": "src/"
+			"GGG\\": "src/"
 		}
 	}
 }
