@@ -15,7 +15,7 @@ class ClassCommand extends Command
 	const NL = "\n";
 	const NLNL = "\n\n";
 	const DIR_SEP = DIRECTORY_SEPARATOR;
-	const BASE_DIR = dirname( dirname( dirname( dirname( __DIR__ ) ) ) );
+	const BASE_DIR = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..';
 	const COMMAND_INFO = [
 		'create:class' => 'Creates a new class file, prepared just the way you like.'
 	];
@@ -42,15 +42,15 @@ class ClassCommand extends Command
 		'constants' => 'The constant or constants specific to your class.',
 		// --public-properties, -p
 		'public-properties' => 'The public property or properties specific to your class.',
-		// --protected-properties, -r
+		// --protected-properties, -q
 		'protected-properties' => 'The protected property or properties specific to your class.',
-		// --private-properties, -v
+		// --private-properties, -r
 		'private-properties' => 'The private property or properties specific to your class.',
-		// --public-static-properties, -P
+		// --public-static-properties, -x
 		'public-static-properties' => 'The public static property or properties specific to your class.',
-		// --protected-static-properties, -R
+		// --protected-static-properties, -y
 		'protected-static-properties' => 'The protected static property or properties specific to your class.',
-		// --private-static-properties, -V
+		// --private-static-properties, -z
 		'private-static-properties' => 'The private static property or properties specific to your class.'
 	];
 	
@@ -65,7 +65,6 @@ class ClassCommand extends Command
 	
 	private $documentCreator; // DocumentCreator;
 	private $tempSaveDir; // '';
-	private $fileContent; // = '';
 	
 	public function __construct( DocumentCreator $documentCreator )
 	{
@@ -109,7 +108,6 @@ class ClassCommand extends Command
 	
 	private function setCommandInfo()
 	{
-		$this->fileContent = '&lt;?php';
 		foreach( static::COMMAND_INFO as $name => $description )
 		{
 			if(! isset( $this->commandName, $this->commandDescription ) )
@@ -180,61 +178,95 @@ class ClassCommand extends Command
 		// Set each option accordingly
 		foreach( $this->commandOptionName as $index => $optionName )
 		{
-			if( in_array( $optionName, ['namespace','implements'] ) )
+			$shortcode = NULL;
+			$inputoption = NULL;
+			$default = NULL;
+			$inputoptions = [
+				'required' => InputOption::VALUE_REQUIRED,
+				'optional' => InputOption::VALUE_OPTIONAL,
+				'required_array' => ( InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY )
+			];
+			
+			switch( $optionName )
 			{
-				$shortcode = substr( $optionName, 0, 1 );
-				$this->addOption(
-					$optionName,
-					$shortcode,
-					InputOption::VALUE_REQUIRED,
-					$this->commandOptionDescription[ $index ],
-					NULL
-				);
+				case 'namespace':
+					$shortcode = 'n';
+					$inputoption = $inputoptions['required'];
+					$default = NULL;
+					break;
+				case 'uses': 
+					$shortcode = 'u';
+					$inputoption = $inputoptions['required_array'];
+					$default = [];
+					break;
+				case 'extends':
+					$shortcode = 'e';
+					$inputoption = $inputoptions['required_array'];
+					$default = [];
+					break;
+				case 'implements':
+					$shortcode = 'i';
+					$inputoption = $inputoptions['required'];
+					$default = NULL;
+					break;
+				case 'traits':
+					$shortcode = 't';
+					$inputoption = $inputoptions['required_array'];
+					$default = [];
+					break;
+				case 'singleton':
+					$shortcode = 's';
+					$inputoption = $inputoptions['optional'];
+					$default = NULL;
+					break;
+				case 'magic-get-set':
+					$shortcode = 'm';
+					$inputoption = $inputoptions['optional'];
+					$default = NULL;
+					break;
+				case 'constants':
+					$shortcode = 'c';
+					$inputoption = $inputoptions['required_array'];
+					$default = [];
+					break;
+				case 'public-properties':
+					$shortcode = 'p';
+					$inputoption = $inputoptions['required_array'];
+					$default = [];
+					break;
+				case 'protected-properties':
+					$shortcode = 'q'; 
+					$inputoption = $inputoptions['required_array'];
+					$default = [];
+					break;
+				case 'private-properties':
+					$shortcode = 'r';
+					$inputoption = $inputoptions['required_array'];
+					$default = [];
+					break;
+				case 'public-static-properties':
+					$shortcode = 'x';
+					$inputoption = $inputoptions['required_array'];
+					$default = [];
+					break;
+				case 'protected-static-properties':
+					$shortcode = 'y';
+					$inputoption = $inputoptions['required_array'];
+					$default = [];
+					break;
+				case 'private-static-properties':
+					$shortcode = 'z';
+					$inputoption = $inputoptions['required_array'];
+					$default = [];
+					break;	
 			}
-			elseif( in_array( $optionName, ['singleton','magic-get-set'] ) )
-			{
-				$this->addOption(
-					$optionName,
-					$shortcode,
-					InputOption::VALUE_OPTIONAL,
-					$this->commandOptionDescription[ $index ],
-					NULL
-				);
-			}
-			else
-			{
-				if( in_array( $optionName, ['public-properties','protected-properties','private-properties','public-static-properties','protected-static-properties','private-static-properties'] ) )
-				{
-					switch( $optionName )
-					{
-						case 'public-properties':
-							$shortcode = 'p';
-							break;
-						case 'protected-properties':
-							$shortcode = 'r'; 
-							break;
-						case 'private-properties':
-							$shortcode = 'v';
-							break;
-						case 'public-static-properties':
-							$shortcode = 'P';
-							break;
-						case 'protected-static-properties':
-							$shortcode = 'R';
-							break;
-						case 'private-static-properties':
-							$shortcode = 'V';
-							break;	
-					}
-				}
-				$this->addOption(
-					$optionName,
-					$shortcode,
-					InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
-					$this->commandOptionDescription[ $index ],
-					[]
-				);
-			}
+			$this->addOption(
+				$optionName,
+				$shortcode,
+				$inputoption,
+				$this->commandOptionDescription[ $index ],
+				$default
+			);
 		}
 	}
 	
@@ -549,130 +581,6 @@ class ClassCommand extends Command
 				}
 			}
 		}
-		$this->documentCreator->create( 'class', $classname, $options );
-	/**
-		$classname = ucwords( $classname );
-		$savedir = preg_replace( '/[\/\\\\]/', DIRECTORY_SEPARATOR, $savedir );
-		$savedir = ( preg_match( '/[\/\\\\]$/', $savedir ) ) ? $savedir : $savedir . DIRECTORY_SEPARATOR;
-			
-		$this->fileContent .=<<<EOT
-
-{$namespace}
-{$uses}
-{$traits['external']}
-class {$classname}{$extends}{$implements}
-{
-	{$traits['internal']}
-	{$constants}
-	{$public_properties}
-	{$protected_properties}
-	{$private_properties}
-	{$public_static_properties}
-	{$protected_static_properties}
-	{$private_static_properties}
-EOT;
-			
-		if( $singleton === NULL )
-		{
-			$this->fileContent .=<<<'EOT'
-	
-	public function __construct()
-	{
-		return $this;
+		$this->documentCreator->create( 'class', $classname, $options );	
 	}
-
-EOT;
-
-		}
-		else
-		{
-			$this->fileContent .=<<<'EOT'
-	
-	protected static $instance = NULL;
-	
-	private function __construct()
-	{
-		return $this;
-	}
-	
-	private function __invoke()
-	{
-		//
-	}
-	
-	private function __clone()
-	{
-		//
-	}
-	
-	private function __sleep()
-	{
-		//
-	}
-	
-	private function __wake()
-	{
-		//
-	}
-	
-	public static function getInstance()
-	{
-		if( self::$instance === NULL )
-		{
-			self::$instance = new self;
-		}
-		return self::$instance;
-	}
-
-EOT;
-
-		}
-		
-		if( $magic_get_set !== NULL )
-		{
-			$this->fileContent .=<<<'EOT'
-
-	public function __set( $property, $value )
-	{
-		$this->$property = $value;
-		return $this;
-	}
-
-	public function __get( $property )
-	{
-		return $this->$property;
-	}
-
-EOT;
-
-		}
-			
-		$this->fileContent .=<<<EOT
-			
-}
-
-EOT;
-		
-		// original regex: "/(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+/", "\n"
-		$this->fileContent = preg_replace( "/(^[\r\n]{2,})[\s\t]*[\r\n]+/", static::NLNL, $this->fileContent );
-		if(! file_exists( $savedir . $classname . '.php' ) )
-		{
-			$file = fopen( $savedir . $classname . '.php', 'w' );
-			if( $file )
-			{
-				fwrite( $file, html_entity_decode( $this->fileContent, ENT_HTML5 ) );
-				$output->writeln( 'Your class ' . $classname . ' got initialized, was populated with your specified data, and has been saved in ' . $savedir . ' successfully.' );
-			}
-			else
-			{
-				$output->writeln( 'Your class ' . $classname . ' could not be saved in ' . $savedir . ', due to this error: ' . error_get_last() . '.' );
-			}
-			fclose( $file );
-		}
-		else
-		{
-			$output->writeln( 'A file with the same name as ' . $classname . ' already exists in ' . $savedir . '.' );
-		}
-	}
-	**/
 }
