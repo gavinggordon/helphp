@@ -11,6 +11,7 @@ This is a PHP CLI package which provides some helpful functions that make creati
 - [symfony/console](https://github.com/symfony/console "Symfony/ConsoleGithub Page") ^3.2
 - [symfony/dependency-injection](https://github.com/symfony/dependency-injection "Symfony/Dependency-Injection Github Page") ^3.2
 - [symfony/filesystem](https://github.com/symfony/filesystem "Symfony/Filesystem Github Page") ^3.2
+- [symfony/event-dispatcher](https://github.com/symfony/event-dispatcher "Symfony/Event-Dispatcher Github Page") ^3.2
 - [symfony/process](https://github.com/symfony/process "Symfony/Process Github Page") ^3.2
 - [symfony/yaml](https://github.com/symfony/yaml "Symfony/Yaml Github Page") ^3.2
 - [pimple/pimple](https://github.com/pimple/pimple "Pimple/Pimple Github Page") ~3.0
@@ -18,7 +19,7 @@ This is a PHP CLI package which provides some helpful functions that make creati
 
 ## Installation
 ```shellscript
-	$	composer require gavinggordon/helphp ^1.0.0-alpha1.0.6
+	$	composer require gavinggordon/helphp ^1.0.0-alpha1.0.7
 ```
 
 ## Usage

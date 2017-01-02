@@ -71,7 +71,7 @@ class ClassCommand extends SymfonyCommand
 			   ->setCommandInfo()
 			   ->setCommandArguments()
 			   ->setCommandOptions();
-		parent::__construct( 'helphp', '1.0.0-alpha1.0.6' );
+		parent::__construct( 'helphp', '1.0.0-alpha1.0.7' );
 		return $this;
 	}
 	
