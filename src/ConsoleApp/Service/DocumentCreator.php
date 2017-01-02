@@ -145,7 +145,7 @@ EOT;
 {$options['namespace']}
 {$options['uses']}
 {$options['traits']['external']}
-{$type} {$options['classname']} {$options['extends']} {$options['implements']}
+{$type} {$classname} {$options['extends']} {$options['implements']}
 {
 	{$options['traits']['internal']}
 	{$options['constants']}
@@ -237,7 +237,7 @@ EOT;
 EOT;
 		
 			// original regex: "/(^[\r\n]*|[\r\n]+)[\s\t]*[\r\n]+/", "\n"
-			$fileContent = preg_replace( "/(^[\r\n]{2,})[\s\t]*[\r\n]+/", static::NLNL, $fileContent );
+			$fileContent = preg_replace( "/(^[\r\n]{2,})[\s\t]*[\r\n]+/", "\n\n", $fileContent );
 			if(! file_exists( $options['savedir'] . $classname . '.php' ) )
 			{
 				$file = fopen( $options['savedir'] . $classname . '.php', 'w' );

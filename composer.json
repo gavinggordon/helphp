@@ -1,10 +1,9 @@
 {
-
 	"name": "gavinggordon/helphp",
 	"description": "A PHP CLI package that provides the developer with the means to generate PHP related files, like classes and .ini's, in a variety of different levels of both simplicity and complexity.",
 	"license": "MIT",
 	"keywords": [
-	  	"v1.0.0-alpha1.0.3",
+	  	"v1.0.0-alpha1.0.4",
 		"php",
 		"code-generation",
 		"templating",
@@ -28,7 +27,7 @@
 			"role": "Developer"
 		}
 	],
-	"version": "1.0.0-alpha1.0.3",
+	"version": "1.0.0-alpha1.0.4",
 	"minimum-stability": "dev",
 	"homepage": "http://helphp.gavingordon.com",
 	"support": {
@@ -46,6 +45,7 @@
 		"symfony/filesystem": "^3.2",
 		"symfony/dependency-injection": "^3.2",
 		"symfony/config": "^3.2",
+		"symfony/process": "^3.2",
 		"symfony/yaml": "^3.2",
 		"pimple/pimple": "~3.0",
 		"spatie/array-to-xml": "^2.2"
@@ -56,11 +56,11 @@
 		}
 	},
 	"scripts": {
-		"post-update": [
-			"GGG\\InitHelper::updateConsoleFile"
+		"post-update-cmd": [
+			"GGG\\InitHelper::installConsolePackage"
 		],
 		"post-package-install": [
-			"GGG\\InitHelper::preparePackage"
+			"GGG\\InitHelper::prepareConsolePackage"
 		]
 	}
 }

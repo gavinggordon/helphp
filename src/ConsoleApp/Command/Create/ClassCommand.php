@@ -2,7 +2,7 @@
 
 namespace GGG\ConsoleApp\Command\Create;
 
-use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -10,12 +10,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 use GGG\ConsoleApp\Service\DocumentCreator as DocumentCreator;
 
-class ClassCommand extends Command
+class ClassCommand extends SymfonyCommand
 {
-	const NL = "\n";
-	const NLNL = "\n\n";
-	const DIR_SEP = DIRECTORY_SEPARATOR;
-	const BASE_DIR = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..';
 	const COMMAND_INFO = [
 		'create:class' => 'Creates a new class file, prepared just the way you like.'
 	];
@@ -42,9 +38,9 @@ class ClassCommand extends Command
 		'constants' => 'The constant or constants specific to your class.',
 		// --public-properties, -p
 		'public-properties' => 'The public property or properties specific to your class.',
-		// --protected-properties, -q
+		// --protected-properties, -r
 		'protected-properties' => 'The protected property or properties specific to your class.',
-		// --private-properties, -r
+		// --private-properties, -w
 		'private-properties' => 'The private property or properties specific to your class.',
 		// --public-static-properties, -x
 		'public-static-properties' => 'The public static property or properties specific to your class.',
@@ -63,8 +59,10 @@ class ClassCommand extends Command
 	protected $commandOptionName; // = [];
 	protected $commandOptionDescription; // = [];
 	
-	private $documentCreator; // DocumentCreator;
-	private $tempSaveDir; // '';
+	protected $documentCreator; // DocumentCreator;
+	protected $tempSaveDir; // '';
+	protected $baseDir; // '';
+	protected $ds; // DIRECTORY_SEPARATOR; 
 	
 	public function __construct( DocumentCreator $documentCreator )
 	{
@@ -73,36 +71,43 @@ class ClassCommand extends Command
 			   ->setCommandInfo()
 			   ->setCommandArguments()
 			   ->setCommandOptions();
-		parent::__construct();
+		parent::__construct( 'helphp', '1.0.0-alpha1.0.4' );
+		return $this;
+	}
+	
+	private function setAppropriateBaseDir()
+	{
+		$this->ds = DIRECTORY_SEPARATOR;
+		$this->baseDir = dirname( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) ); 
 		return $this;
 	}
 	
 	private function setAppropriateSaveDir()
 	{
-		$baseDir = ( is_dir( static::BASE_DIR . static::DIR_SEP . 'vendor' ) && file_exists( static::BASE_DIR . static::DIR_SEP . 'vendor' . static::DIR_SEP . 'autoload.php' ) ) 
-						 ? static::BASE_DIR . static::DIR_SEP : 
-						 ( is_dir( static::BASE_DIR . static::DIR_SEP . '..' . static::DIR_SEP . 'vendor' ) && file_exists( static::BASE_DIR . static::DIR_SEP . '..' . static::DIR_SEP . 'vendor' . static::DIR_SEP . 'autoload.php' ) ) 
-						 ? static::BASE_DIR . static::DIR_SEP . '..' . static::DIR_SEP : 
-						 dirname( dirname( __DIR__ ) ) . static::DIR_SEP;
+		$baseDir = ( is_dir( $this->baseDir . $this->ds . 'vendor' ) && file_exists( $this->baseDir . $this->ds . 'vendor' . $this->ds . 'autoload.php' ) ) 
+						 ? $this->baseDir . $this->ds : 
+						 ( is_dir( $this->baseDir . $this->ds . '..' . $this->ds . 'vendor' ) && file_exists( $this->baseDir . $this->ds . '..' . $this->ds . 'vendor' . $this->ds . 'autoload.php' ) ) 
+						 ? $this->baseDir . $this->ds . '..' . $this->ds : 
+						 dirname( dirname( __DIR__ ) ) . $this->ds;
 		if(! is_dir( $baseDir . 'tmp' ) )
 		{
-			if( mkdir( $baseDir . 'tmp' . static::DIR_SEP . 'helphp', 0755, true ) )
+			if( mkdir( $baseDir . 'tmp' . $this->ds . 'helphp', 0755, true ) )
 			{
 				chmod( $baseDir . 'tmp', 0755 );
-				chmod( $baseDir . 'tmp' . static::DIR_SEP . 'helphp', 0755 );
+				chmod( $baseDir . 'tmp' . $this->ds . 'helphp', 0755 );
 			}
 		}
 		else
 		{	
-			if(! is_dir( $baseDir . 'tmp' . static::DIR_SEP . 'helphp' ) )
+			if(! is_dir( $baseDir . 'tmp' . $this->ds . 'helphp' ) )
 			{
-				if( mkdir( $baseDir . 'tmp' . static::DIR_SEP . 'helphp', 0755 ) )
+				if( mkdir( $baseDir . 'tmp' . $this->ds . 'helphp', 0755 ) )
 				{
-					chmod( $baseDir . 'tmp' . static::DIR_SEP . 'helphp', 0755 );
+					chmod( $baseDir . 'tmp' . $this->ds . 'helphp', 0755 );
 				}
 			}
 		}
-		$this->tempSaveDir = $baseDir . 'tmp' . static::DIR_SEP . 'helphp' . static::DIR_SEP;
+		$this->tempSaveDir = $baseDir . 'tmp' . $this->ds . 'helphp' . $this->ds;
 		return $this;
 	}
 	
@@ -190,7 +195,7 @@ class ClassCommand extends Command
 			switch( $optionName )
 			{
 				case 'namespace':
-					$shortcode = 'n';
+					$shortcode = 'a';
 					$inputoption = $inputoptions['required'];
 					$default = NULL;
 					break;
@@ -235,12 +240,12 @@ class ClassCommand extends Command
 					$default = [];
 					break;
 				case 'protected-properties':
-					$shortcode = 'q'; 
+					$shortcode = 'r'; 
 					$inputoption = $inputoptions['required_array'];
 					$default = [];
 					break;
 				case 'private-properties':
-					$shortcode = 'r';
+					$shortcode = 'w';
 					$inputoption = $inputoptions['required_array'];
 					$default = [];
 					break;
@@ -273,7 +278,7 @@ class ClassCommand extends Command
 	protected function execute( InputInterface $input, OutputInterface $output )
 	{
 		$classname = $input->getArgument( $this->commandArgumentName[0] );
-		$savedir = $input->getArgument( $this->commandArgumentName[1] ) || NULL;
+		$savedir = $input->getArgument( $this->commandArgumentName[1] );
 		
 		// $namespace = $uses = $extends = $implements = $traits = $singleton = $magic_get_set = $constants = $public_properties = $protected_properties = $private_properties = $public_static_properties = $protected_static_properties = $private_static_properties = NULL;
 		$options = [
@@ -301,7 +306,7 @@ class ClassCommand extends Command
 			{
 				if( is_string( $input->getOption( $optionName ) ) && strlen( $input->getOption( $optionName ) ) > 1 )
 				{
-					$options[ $optionName ] = 'namespace ' . $input->getOption( $optionName ) . ';' . static::NLNL;
+					$options[ $optionName ] = 'namespace ' . $input->getOption( $optionName ) . ';' . "\n\n";
 				}
 			}
 			if( $optionName === 'uses' )
@@ -311,7 +316,7 @@ class ClassCommand extends Command
 					$uses = '';
 					foreach( $input->getOption( $optionName ) as $index => $use )
 					{
-						$uses .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? 'use ' . $use . ';' . static::NLNL : 'use ' . $use . ';' . static::NL;
+						$uses .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? 'use ' . $use . ';' . "\n\n" : 'use ' . $use . ';' . "\n";
 					}
 					$options[ $optionName ] = $uses;
 				}
@@ -345,7 +350,7 @@ class ClassCommand extends Command
 					];
 					foreach( $input->getOption( $optionName ) as $index => $trait )
 					{
-						$traits['external'] .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? 'use ' . $trait . ';' . static::NLNL : 'use ' . $trait . ';' . static::NL;
+						$traits['external'] .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? 'use ' . $trait . ';' . "\n\n" : 'use ' . $trait . ';' . "\n";
 						/*
 						 * if trait is the LAST option:
 						 *	  if LAST trait ends with "{...} as {...}":
@@ -358,7 +363,7 @@ class ClassCommand extends Command
 						 *   else (for example, if trait ends with ";" or does not end with "{...} as {...}"):
 						 *      "Tests\Test\Class;" becomes "Class, "
 						 */
-						$traits['internal'] .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? ( ( preg_match( '/[\s]+?as[\s]+?[A-Za-z0-9]+?[\;]?$/', $trait ) ) ? str_replace( ';', '', substr( $trait, strripos( $trait, 'as ' ) + 3 ) ) . ';' . static::NLNL : str_replace( ';', '', substr( $trait, strripos( $trait, trim('\\ ') ) + 1 ) ) . ';' . static::NLNL ) : ( ( preg_match( '/[\s]+?as[\s]+?[A-Za-z0-9]+?[\;]?$/', $trait ) ) ? str_replace( ';', '', substr( $trait, strripos( $trait, 'as ' ) + 3 ) ) . ', ' : str_replace( ';', '', substr( $trait, strripos( $trait, trim('\\ ') ) + 1 ) ) . ', ' );
+						$traits['internal'] .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? ( ( preg_match( '/[\s]+?as[\s]+?[A-Za-z0-9]+?[\;]?$/', $trait ) ) ? str_replace( ';', '', substr( $trait, strripos( $trait, 'as ' ) + 3 ) ) . ';' . "\n\n" : str_replace( ';', '', substr( $trait, strripos( $trait, trim('\\ ') ) + 1 ) ) . ';' . "\n\n" ) : ( ( preg_match( '/[\s]+?as[\s]+?[A-Za-z0-9]+?[\;]?$/', $trait ) ) ? str_replace( ';', '', substr( $trait, strripos( $trait, 'as ' ) + 3 ) ) . ', ' : str_replace( ';', '', substr( $trait, strripos( $trait, trim('\\ ') ) + 1 ) ) . ', ' );
 					}
 					$options[ $optionName ] = $traits;
 				}
@@ -390,7 +395,7 @@ class ClassCommand extends Command
 						switch( gettype( $value ) )
 						{
 							case 'String':
-								$constants .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? "const {$key} = '{$value}';" . static::NLNL : "const {$key} = '{$value}';" . static::NL;
+								$constants .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? "const {$key} = '{$value}';" . "\n\n" : "const {$key} = '{$value}';" . "\n";
 								break;
 								
 							case 'Float':
@@ -399,7 +404,7 @@ class ClassCommand extends Command
 							case 'Integer':
 							case 'Boolean':
 							case 'Resource':
-								$constants .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? "const {$key} = {$value};" . static::NLNL :  "const {$key} = {$value};" . static::NL;
+								$constants .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? "const {$key} = {$value};" . "\n\n" :  "const {$key} = {$value};" . "\n";
 								break;
 						}
 					}
@@ -419,7 +424,7 @@ class ClassCommand extends Command
 						switch( gettype( $value ) )
 						{
 							case 'String':
-								$public_properties .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? "public \${$key} = '{$value}';" . static::NLNL :  "public \${$key} = '{$value}';" . static::NL;
+								$public_properties .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? "public \${$key} = '{$value}';" . "\n\n" :  "public \${$key} = '{$value}';" . "\n";
 								break;
 								
 							case 'Float':
@@ -428,7 +433,7 @@ class ClassCommand extends Command
 							case 'Integer':
 							case 'Boolean':
 							case 'Resource':
-								$public_properties .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? "public \${$key} = {$value};" . static::NLNL :  "public \${$key} = {$value};" . static::NL;
+								$public_properties .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? "public \${$key} = {$value};" . "\n\n" :  "public \${$key} = {$value};" . "\n";
 								break;
 						}
 					}
@@ -448,7 +453,7 @@ class ClassCommand extends Command
 						switch( gettype( $value ) )
 						{
 							case 'String':
-								$protected_properties .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? "protected \${$key} = '{$value}';" . static::NLNL :  "protected \${$key} = '{$value}';" . static::NL;
+								$protected_properties .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? "protected \${$key} = '{$value}';" . "\n\n" :  "protected \${$key} = '{$value}';" . "\n";
 								break;
 								
 							case 'Float':
@@ -457,7 +462,7 @@ class ClassCommand extends Command
 							case 'Integer':
 							case 'Boolean':
 							case 'Resource':
-								$protected_properties .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? "protected \${$key} = {$value};" . static::NLNL :  "protected \${$key} = {$value};" . static::NL;
+								$protected_properties .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? "protected \${$key} = {$value};" . "\n\n" :  "protected \${$key} = {$value};" . "\n";
 								break;
 						}
 					}
@@ -477,7 +482,7 @@ class ClassCommand extends Command
 						switch( gettype( $value ) )
 						{
 							case 'String':
-								$private_properties .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? "private \${$key} = '{$value}';" . static::NLNL :  "private \${$key} = '{$value}';" . static::NL;
+								$private_properties .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? "private \${$key} = '{$value}';" . "\n\n" :  "private \${$key} = '{$value}';" . "\n";
 								break;
 								
 							case 'Float':
@@ -486,7 +491,7 @@ class ClassCommand extends Command
 							case 'Integer':
 							case 'Boolean':
 							case 'Resource':
-								$private_properties .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? "private \${$key} = {$value};" . static::NLNL :  "private \${$key} = {$value};" . static::NL;
+								$private_properties .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? "private \${$key} = {$value};" . "\n\n" :  "private \${$key} = {$value};" . "\n";
 								break;
 						}
 					}
@@ -506,7 +511,7 @@ class ClassCommand extends Command
 						switch( gettype( $value ) )
 						{
 							case 'String':
-								$public_static_properties .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? "public static \${$key} = '{$value}';" . static::NLNL :  "public static \${$key} = '{$value}';" . static::NL;
+								$public_static_properties .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? "public static \${$key} = '{$value}';" . "\n\n" :  "public static \${$key} = '{$value}';" . "\n";
 								break;
 								
 							case 'Float':
@@ -515,7 +520,7 @@ class ClassCommand extends Command
 							case 'Integer':
 							case 'Boolean':
 							case 'Resource':
-								$public_static_properties .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? "public static \${$key} = {$value};" . static::NLNL :  "public static \${$key} = {$value};" . static::NL;
+								$public_static_properties .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? "public static \${$key} = {$value};" . "\n\n" :  "public static \${$key} = {$value};" . "\n";
 								break;
 						}
 					}
@@ -535,7 +540,7 @@ class ClassCommand extends Command
 						switch( gettype( $value ) )
 						{
 							case 'String':
-								$protected_static_properties .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? "protected static\${$key} = '{$value}';" . static::NLNL :  "protected static\${$key} = '{$value}';" . static::NL;
+								$protected_static_properties .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? "protected static \${$key} = '{$value}';" . "\n\n" :  "protected static \${$key} = '{$value}';" . "\n";
 								break;
 								
 							case 'Float':
@@ -544,7 +549,7 @@ class ClassCommand extends Command
 							case 'Integer':
 							case 'Boolean':
 							case 'Resource':
-								$protected_static_properties .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? "protected static\${$key} = {$value};" . static::NLNL :  "protected static\${$key} = {$value};" . static::NL;
+								$protected_static_properties .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? "protected static \${$key} = {$value};" . "\n\n" :  "protected static \${$key} = {$value};" . "\n";
 								break;
 						}
 					}
@@ -564,7 +569,7 @@ class ClassCommand extends Command
 						switch( gettype( $value ) )
 						{
 							case 'String':
-								$private_static_properties .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? "private static \${$key} = '{$value}';" . static::NLNL :  "private static \${$key} = '{$value}';" . static::NL;
+								$private_static_properties .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? "private static \${$key} = '{$value}';" . "\n\n" :  "private static \${$key} = '{$value}';" . "\n";
 								break;
 								
 							case 'Float':
@@ -573,7 +578,7 @@ class ClassCommand extends Command
 							case 'Integer':
 							case 'Boolean':
 							case 'Resource':
-								$private_static_properties .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? "private static \${$key} = {$value};" . static::NLNL :  "private static \${$key} = {$value};" . static::NL;
+								$private_static_properties .= ( $index === count( $input->getOption( $optionName ) ) - 1 ) ? "private static \${$key} = {$value};" . "\n\n" :  "private static \${$key} = {$value};" . "\n";
 								break;
 						}
 					}
