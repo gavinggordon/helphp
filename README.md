@@ -19,7 +19,7 @@ This is a PHP CLI package which provides some helpful functions that make creati
 
 ## Installation
 ```shellscript
-	$	composer require gavinggordon/helphp ^1.0.0-alpha1.0.7
+	$	composer require gavinggordon/helphp ^1.0.0
 ```
 
 ## Usage
@@ -40,14 +40,14 @@ This is a PHP CLI package which provides some helpful functions that make creati
 			- '--implements, -i'
 			- '--traits, -t'
 			- '--singleton, -s'
-			- '--magic-set-get, -n'
+			- '--magic-set-get, -m'
 			- '--constants, -c'
 			- '--public-properties, -p'
 			- '--protected-properties, -r'
-			- '--private-properties, -v'
-			- '--public-static-properties, -P'
-			- '--protected-static-properties, -R'
-			- '--private-static-properties, -V'
+			- '--private-properties, -w'
+			- '--public-static-properties, -x'
+			- '--protected-static-properties, -y'
+			- '--private-static-properties, -z'
 	- Abstract Class (*Still In Production*)
 	- Interface (*Still In Production*)
 	- Trait (*Still In Production*)

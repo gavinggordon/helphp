@@ -23,6 +23,22 @@ class InitHelper
 			$io->writeError( [ 'There seems to be a problem...', 'Failed to update "helphp" PHP CLI Package.' ], true );
 		}
     }
+	
+	// pre-autoload-dump
+    public static function initConsolePackage( Event $event )
+    {
+		$io = $event->getIO();
+		$baseDir = $event->getComposer()->getConfig()->get('vendor-dir') . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR;
+		$dest = ( preg_match( '/[\/\\\\]$/', $baseDir ) ) ? $baseDir . 'helphp' : $baseDir . DIRECTORY_SEPARATOR . 'helphp';
+		if( file_put_contents( $dest, file_get_contents( dirname( dirname( __FILE__ ) ) . DIRECTORY_SEPARATOR . 'helphp' ) ) )
+		{
+			$io->write( [ 'Initialization process complete!', 'PHP CLI Package "helphp" is ready to use.' ], true );
+		}
+		else
+		{
+			$io->writeError( [ 'There seems to be a problem...', 'Failed to initialize "helphp" PHP CLI Package.' ], true );
+		}
+    }
 
 	// post-package-install
     public static function installConsolePackage( PackageEvent $event )
