@@ -28,6 +28,7 @@ use Symfony\Component\Console\Tester\ApplicationTester;
 use Symfony\Component\Console\Event\ConsoleCommandEvent;
 use Symfony\Component\Console\Event\ConsoleExceptionEvent;
 use Symfony\Component\Console\Event\ConsoleTerminateEvent;
+use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class ApplicationTest extends \PHPUnit_Framework_TestCase
@@ -211,16 +212,15 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('foo', $application->findNamespace('foo'), '->findNamespace() returns commands even if the commands are only contained in subnamespaces');
     }
 
-    /**
-     * @expectedException        \Symfony\Component\Console\Exception\CommandNotFoundException
-     * @expectedExceptionMessage The namespace "f" is ambiguous (foo, foo1).
-     */
     public function testFindAmbiguousNamespace()
     {
         $application = new Application();
         $application->add(new \BarBucCommand());
         $application->add(new \FooCommand());
         $application->add(new \Foo2Command());
+
+        $expectedMsg = "The namespace \"f\" is ambiguous.\nDid you mean one of these?\n    foo\n    foo1";
+        $this->setExpectedException(CommandNotFoundException::class, $expectedMsg);
         $application->findNamespace('f');
     }
 
@@ -279,8 +279,20 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
     {
         return array(
             array('f', 'Command "f" is not defined.'),
-            array('a', 'Command "a" is ambiguous (afoobar, afoobar1 and 1 more).'),
-            array('foo:b', 'Command "foo:b" is ambiguous (foo:bar, foo:bar1 and 1 more).'),
+            array(
+                'a',
+                "Command \"a\" is ambiguous.\nDid you mean one of these?\n".
+                "    afoobar  The foo:bar command\n".
+                "    afoobar1 The foo:bar1 command\n".
+                '    afoobar2 The foo1:bar command',
+            ),
+            array(
+                'foo:b',
+                "Command \"foo:b\" is ambiguous.\nDid you mean one of these?\n".
+                "    foo:bar  The foo:bar command\n".
+                "    foo:bar1 The foo:bar1 command\n".
+                '    foo1:bar The foo1:bar command',
+            ),
         );
     }
 
@@ -454,7 +466,7 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
 
     public function testFindNamespaceDoesNotFailOnDeepSimilarNamespaces()
     {
-        $application = $this->getMock('Symfony\Component\Console\Application', array('getNamespaces'));
+        $application = $this->getMockBuilder('Symfony\Component\Console\Application')->setMethods(array('getNamespaces'))->getMock();
         $application->expects($this->once())
             ->method('getNamespaces')
             ->will($this->returnValue(array('foo:sublong', 'bar:sub')));
@@ -701,7 +713,7 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
     {
         $exception = new \Exception('', 4);
 
-        $application = $this->getMock('Symfony\Component\Console\Application', array('doRun'));
+        $application = $this->getMockBuilder('Symfony\Component\Console\Application')->setMethods(array('doRun'))->getMock();
         $application->setAutoExit(false);
         $application->expects($this->once())
             ->method('doRun')
@@ -716,7 +728,7 @@ class ApplicationTest extends \PHPUnit_Framework_TestCase
     {
         $exception = new \Exception('', 0);
 
-        $application = $this->getMock('Symfony\Component\Console\Application', array('doRun'));
+        $application = $this->getMockBuilder('Symfony\Component\Console\Application')->setMethods(array('doRun'))->getMock();
         $application->setAutoExit(false);
         $application->expects($this->once())
             ->method('doRun')
